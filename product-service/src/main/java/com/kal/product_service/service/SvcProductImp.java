@@ -22,12 +22,12 @@ public class SvcProductImp implements SvcProduct{
     
     @Override
     public List<DtoProductOut> getProducts() {
-        return List.of();
+        return mapperProduct.productsToDtoProductsOut( repoProduct.findAll());
     }
 
     @Override
     public DtoProductOut getProduct(Integer id) {
-        return null;
+        return mapperProduct.productToDtoProductOut(repoProduct.findById(id));
     }
 
     @Override
