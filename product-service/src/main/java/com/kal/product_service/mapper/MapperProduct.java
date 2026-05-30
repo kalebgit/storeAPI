@@ -12,7 +12,7 @@ import java.util.List;
 public interface MapperProduct {
     //los dtos in
     DtoProductIn productToDtoProductIn(Product product);
-    Product productDotInToProduct(DtoProductIn DtoProductIn);
+    Product dtoproductInToProduct(DtoProductIn DtoProductIn);
 
     //los dtos out
     DtoProductOut productToDtoProductOut(Product product);

@@ -14,7 +14,7 @@ public class DtoProductOut {
 
     private String gtin;
 
-    private String product;
+    private String name;
 
     private String description;
 

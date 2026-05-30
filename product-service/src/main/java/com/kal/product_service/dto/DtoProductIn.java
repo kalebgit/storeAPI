@@ -14,7 +14,7 @@ public class DtoProductIn {
     private String gtin;
 
     @NotNull(message="El product es obligatorio")
-    private String product;
+    private String name;
 
     @NotNull(message="El description es obligatorio")
     private String description;
