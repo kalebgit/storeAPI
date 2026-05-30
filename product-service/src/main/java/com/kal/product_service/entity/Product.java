@@ -33,7 +33,7 @@ public class Product{
     @Column(name = "stock")
     private Integer stock;
 
-    @Column(name = "category_id")
+    @Column(name = "category")
     private Integer category_id;
 
     @Column(name = "status")
