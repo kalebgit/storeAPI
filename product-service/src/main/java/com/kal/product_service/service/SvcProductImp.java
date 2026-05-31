@@ -2,6 +2,7 @@ package com.kal.product_service.service;
 
 import com.kal.product_service.dto.DtoProductIn;
 import com.kal.product_service.dto.DtoProductOut;
+import com.kal.product_service.entity.Product;
 import com.kal.product_service.exception.ApiException;
 import com.kal.product_service.exception.DBAccessException;
 import com.kal.product_service.mapper.MapperProduct;
@@ -59,18 +60,42 @@ public class SvcProductImp implements SvcProduct{
 
     @Override
     public String updateProduct(Integer id, DtoProductIn in) {
-
+        Product product = repoProduct.findById(id)
+                .orElseThrow(() -> new ApiException("Producto no encontrado con id: " + id, HttpStatus.NOT_FOUND));
+        product.setGtin(in.getGtin());
+        product.setName(in.getName());
+        product.setDescription(in.getDescription());
+        product.setPrice(in.getPrice());
+        product.setStock(in.getStock());
+        product.setCategory_id(in.getCategory_id());
+        try {
+            repoProduct.save(product);
+        } catch (DataAccessException e) {
+            Throwable cause = e.getMostSpecificCause();
+            String msg = Optional.ofNullable(cause.getMessage()).orElse("");
+            if (msg.contains("ux_product_gtin")) throw new ApiException("El gtin de este producto ya esta registrado", HttpStatus.CONFLICT);
+            if (msg.contains("ux_product_name")) throw new ApiException("El nombre de este producto ya esta registrado", HttpStatus.CONFLICT);
+            if (msg.contains("fk_product_category")) throw new ApiException("El id de categoria no existe", HttpStatus.CONFLICT);
+            throw new DBAccessException(e);
+        }
         return "El producto ha sido actualizado";
     }
 
-
     @Override
     public String enableProduct(Integer id) {
-        return "";
+        Product product = repoProduct.findById(id)
+                .orElseThrow(() -> new ApiException("Producto no encontrado con id: " + id, HttpStatus.NOT_FOUND));
+        product.setStatus(1);
+        repoProduct.save(product);
+        return "El producto ha sido activado";
     }
 
     @Override
     public String disableProduct(Integer id) {
-        return "";
+        Product product = repoProduct.findById(id)
+                .orElseThrow(() -> new ApiException("Producto no encontrado con id: " + id, HttpStatus.NOT_FOUND));
+        product.setStatus(0);
+        repoProduct.save(product);
+        return "El producto ha sido desactivado";
     }
 }

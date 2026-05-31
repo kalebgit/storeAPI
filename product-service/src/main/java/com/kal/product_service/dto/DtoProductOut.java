@@ -22,7 +22,6 @@ public class DtoProductOut {
 
     private Integer stock;
 
-    //TODO: tenemos que poner directamente la clase anidada ver issue #2
     private Integer category_id;
 
 }
