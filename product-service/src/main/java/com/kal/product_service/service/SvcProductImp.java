@@ -26,7 +26,7 @@ public class SvcProductImp implements SvcProduct{
     private final RepoProduct repoProduct;
     private final MapperProduct mapperProduct;
 
-    
+
     @Override
     public List<DtoProductOut> getProducts() {
         return mapperProduct.productsToDtoProductsOut( repoProduct.findAll());
@@ -52,8 +52,6 @@ public class SvcProductImp implements SvcProduct{
             if(msg.contains("ux_product_name")) throw new ApiException("El nombre de este producto ya esta registrado", HttpStatus.CONFLICT);
             if(msg.contains("fk_product_category")) throw new ApiException("El id de categoria no existe", HttpStatus.CONFLICT);
             throw new DBAccessException(e);
-
-
         }
         return "El producto ha sido registrado";
     }
