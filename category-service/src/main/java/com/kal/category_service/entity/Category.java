@@ -1,6 +1,5 @@
 package com.kal.category_service.entity;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -11,19 +10,15 @@ public class Category {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="category_id")
-    @JsonProperty("category_id")
-    Integer category_id;
+    @Column(name = "category_id")
+    private Integer categoryId;
 
     @Column(name = "category")
-    @JsonProperty("category")
-    String category;
+    private String category;
 
     @Column(name = "tag")
-    @JsonProperty("tag")
-    String tag;
+    private String tag;
 
     @Column(name = "status")
-    @JsonProperty("status")
-    Integer status;
+    private Integer status;
 }

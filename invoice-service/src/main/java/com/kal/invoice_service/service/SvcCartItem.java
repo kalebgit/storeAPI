@@ -15,7 +15,7 @@ public interface SvcCartItem {
     // y pues leer los cartitems es algo basico
 
     String add(DtoCartItemIn cartItemIn);
-    String remove(String cartItemId);
-    String clearCart(String customerId);
-    List<DtoCartItemOut> getCart(String customerId);
+    String remove(Integer cartItemId);
+    String clearCart(Integer customerId);
+    List<DtoCartItemOut> getCart(Integer customerId);
 }

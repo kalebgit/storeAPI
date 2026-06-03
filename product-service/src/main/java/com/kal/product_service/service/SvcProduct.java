@@ -8,11 +8,12 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 public interface SvcProduct {
-    public List<DtoProductOut> getProducts();
-    public DtoProductOut getProduct(Integer id);
-    public String createProduct(DtoProductIn in);
-    public String updateProduct(Integer id, DtoProductIn in);
-    public String enableProduct(Integer id);
-    public String disableProduct(Integer id);
+    List<DtoProductOut> getProducts();
+    DtoProductOut getProduct(Integer id);
+    String createProduct(DtoProductIn in);
+    String updateProduct(Integer id, DtoProductIn in);
+    String updateStock(Integer id, Integer quantity);
+    String enableProduct(Integer id);
+    String disableProduct(Integer id);
 
 }

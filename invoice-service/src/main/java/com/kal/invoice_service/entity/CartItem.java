@@ -14,9 +14,11 @@ public class CartItem {
     private Integer id;
 
     @NotNull
+    @Column(name = "customer_id")
     private Integer customerId;
 
     @NotNull
+    @Column(name = "product_id")
     private Integer productId;
 
     private Integer quantity;

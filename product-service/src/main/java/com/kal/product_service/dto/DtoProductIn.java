@@ -26,6 +26,6 @@ public class DtoProductIn {
     @NotNull(message="El stock es obligatorio")
     private Integer stock;
 
-    @NotNull(message="El category_id es obligatorio")
-    private Integer category_id;
+    @NotNull(message="El categoryId es obligatorio")
+    private Integer categoryId;
 }

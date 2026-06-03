@@ -55,18 +55,39 @@ public class SvcCartItemImp implements SvcCartItem{
     }
 
     @Override
-    public String remove(String cartItemId) {
-        
-        return ;
+    public String remove(Integer cartItemId) {
+        try{
+            repoCartItem.deleteById(cartItemId);
+        }catch(DataAccessException e){
+            throw new DBAccessException(e);
+        }
+        return "El producto fue eliminado del carrito";
     }
 
     @Override
-    public String clearCart(String customerId) {
-        return "";
+    public String clearCart(Integer customerId) {
+        try{
+            repoCartItem.deleteCartItemByCustomerId(customerId);
+        }catch(DataAccessException e){
+            Throwable cause = e.getMostSpecificCause();
+            String msg = Optional.ofNullable(cause.getMessage()).orElse("");
+            if (msg.contains("fk_cart_item_id")) throw new ApiException("El id de este producto en el carrito no existe", HttpStatus.CONFLICT);
+            throw new DBAccessException(e);
+        }
+        return "El carrito completo fue eliminado";
     }
 
     @Override
-    public List<DtoCartItemOut> getCart(String customerId) {
-        return List.of();
+    public List<DtoCartItemOut> getCart(Integer customerId) {
+        try{
+
+            return mapperCartItem.cartItemsToDtoCartItemsOut(repoCartItem.getCartItemsByCustomerId(customerId));
+
+        }catch(DataAccessException e){
+            Throwable cause = e.getMostSpecificCause();
+            String msg = Optional.ofNullable(cause.getMessage()).orElse("");
+            if (msg.contains("fk_cart_item_id")) throw new ApiException("El id de este producto en el carrito no existe", HttpStatus.CONFLICT);
+            throw new DBAccessException(e);
+        }
     }
 }

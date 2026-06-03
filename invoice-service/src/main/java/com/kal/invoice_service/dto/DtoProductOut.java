@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class DtoProductOut {
 
-    private Integer product_id;
+    private Integer productId;
 
     private String gtin;
 
@@ -17,6 +17,6 @@ public class DtoProductOut {
 
     private Integer stock;
 
-    private Integer category_id;
+    private Integer categoryId;
 
 }
