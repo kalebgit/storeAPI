@@ -1,1 +1,19 @@
 # Configuración del auth-service
+spring:
+  application:
+    name: auth-service
+  datasource:
+    url: jdbc:mysql://localhost:3306/auth_db
+    username: ${DB_AUTH_USER} # TODO: estas variables se definiran en el archivo de docker
+    password: ${DB_AUTH_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration-ms: 86400000    # 24 horas
+
+server:
+  port: 8085
