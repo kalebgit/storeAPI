@@ -12,8 +12,9 @@ spring:
     show-sql: false
 
 jwt:
-  secret: ${JWT_SECRET}
-  expiration-ms: 86400000    # 24 horas
+  private-key: ${JWT_PRIVATE_KEY}  # variable de entorno en el servidor
+  public-key: ${JWT_PUBLIC_KEY}    # variable de entorno en el servidor
+  expiration-ms: 86400000
 
 server:
   port: 8085

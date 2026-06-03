@@ -2,6 +2,14 @@ server:
   port: 8080
 
 spring:
+
+  #para la parte de jwt y las claves privadas y publicas
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://auth-service/.well-known/jwks.json
+
   cloud:
     gateway:
       server:

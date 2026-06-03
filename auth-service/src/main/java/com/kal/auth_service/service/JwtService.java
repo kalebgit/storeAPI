@@ -9,29 +9,43 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyFactory;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Base64;
 import java.util.Date;
 
 @Service
 public class JwtService {
-    @Value("${jwt.secret}") //busca tal cual esta propiedad en el archivo de config
-    private String secret;
+
+    @Value("${jwt.private-key}")
+    private String privateKeyPem;
 
     @Value("${jwt.expiration-ms}")
     private long expirationMs;
 
-    public String generateToken(UserDetails userDetails){
-        User user = (User) userDetails;
-        SecretKey key = new SecretKeySpec(
-                secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"
-        );
+    public String generateToken(UserDetails userDetails) {
+        RSAPrivateKey privateKey = loadPrivateKey(privateKeyPem);
+
         return Jwts.builder()
-                .subject(userDetails.getUsername())//en realidad es el email
-                .claim("user_id", user.getId())
+                .subject(userDetails.getUsername())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationMs))
-                .signWith(key)
+                .signWith(privateKey)  // RS256 automático con RSAPrivateKey
                 .compact();
-
     }
 
+    private RSAPrivateKey loadPrivateKey(String pem) {
+        try {
+            String clean = pem
+                    .replace("-----BEGIN PRIVATE KEY-----", "")
+                    .replace("-----END PRIVATE KEY-----", "")
+                    .replaceAll("\\s", "");
+            byte[] decoded = Base64.getDecoder().decode(clean);
+            KeyFactory kf = KeyFactory.getInstance("RSA");
+            return (RSAPrivateKey) kf.generatePrivate(new PKCS8EncodedKeySpec(decoded));
+        } catch (Exception e) {
+            throw new RuntimeException("Error cargando clave privada RSA", e);
+        }
+    }
 }
