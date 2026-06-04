@@ -5,3 +5,5 @@ eureka:
   client:
     register-with-eureka: false
     fetch-registry: false
+  server:
+    wait-time-in-ms-when-sync-empty: 0  # no esperar en arranque local

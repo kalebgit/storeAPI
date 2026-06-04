@@ -1,0 +1,149 @@
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  config-service:
+    build: ./config-service
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8888/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+  registry-service:
+    build: ./registry-service
+    depends_on:
+      config-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8761/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+  auth-service:
+    build: ./auth-service
+    depends_on:
+      config-service:
+        condition: service_healthy
+      registry-service:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_CLOUD_CONFIG_URI: http://config-service:8888
+      DB_AUTH_USER: ${DB_USER}
+      DB_AUTH_PASSWORD: ${DB_PASSWORD}
+      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      SPRING_PROFILES_ACTIVE: prod
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8085/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+  customer-service:
+    build: ./customer-service
+    depends_on:
+      config-service:
+        condition: service_healthy
+      registry-service:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_CLOUD_CONFIG_URI: http://config-service:8888
+      DB_CUSTOMER_USER: ${DB_USER}
+      DB_CUSTOMER_PASSWORD: ${DB_PASSWORD}
+      SPRING_PROFILES_ACTIVE: prod
+
+  product-service:
+    build: ./product-service
+    depends_on:
+      config-service:
+        condition: service_healthy
+      registry-service:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_CLOUD_CONFIG_URI: http://config-service:8888
+      DB_PRODUCT_USER: ${DB_USER}
+      DB_PRODUCT_PASSWORD: ${DB_PASSWORD}
+      SPRING_PROFILES_ACTIVE: prod
+
+  category-service:
+    build: ./category-service
+    depends_on:
+      config-service:
+        condition: service_healthy
+      registry-service:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_CLOUD_CONFIG_URI: http://config-service:8888
+      DB_CATEGORY_USER: ${DB_USER}
+      DB_CATEGORY_PASSWORD: ${DB_PASSWORD}
+      SPRING_PROFILES_ACTIVE: prod
+
+  invoice-service:
+    build: ./invoice-service
+    depends_on:
+      config-service:
+        condition: service_healthy
+      registry-service:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_CLOUD_CONFIG_URI: http://config-service:8888
+      DB_INVOICE_USER: ${DB_USER}
+      DB_INVOICE_PASSWORD: ${DB_PASSWORD}
+      SPRING_PROFILES_ACTIVE: prod
+
+  gateway-service:
+    build: ./gateway-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      config-service:
+        condition: service_healthy
+      registry-service:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    environment:
+      SPRING_CLOUD_CONFIG_URI: http://config-service:8888
+      SPRING_PROFILES_ACTIVE: prod
+
+  admin-service:
+    build: ./admin-service
+    depends_on:
+      config-service:
+        condition: service_healthy
+      registry-service:
+        condition: service_healthy
+    environment:
+      SPRING_CLOUD_CONFIG_URI: http://config-service:8888
+      SPRING_PROFILES_ACTIVE: prod
+
+volumes:
+  postgres_data:

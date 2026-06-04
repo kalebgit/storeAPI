@@ -1,5 +1,5 @@
 server:
-  port: 8085
+  port: 8084
 
 spring:
   jpa:
@@ -7,9 +7,6 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     driver-class-name: org.postgresql.Driver
-
-jwt:
-  expiration-ms: 86400000
 
 eureka:
   instance:
@@ -32,17 +29,13 @@ spring:
     activate:
       on-profile: dev
   datasource:
-    url: jdbc:postgresql://localhost:5432/auth_db
+    url: jdbc:postgresql://localhost:5432/category_db
     username: postgres
     password: root
   jpa:
     show-sql: true
     hibernate:
       ddl-auto: update
-jwt:
-  # TODO: reemplazar con claves RSA reales generadas con openssl
-  private-key: ${JWT_PRIVATE_KEY}
-  public-key: ${JWT_PUBLIC_KEY}
 eureka:
   client:
     service-url:
@@ -54,16 +47,13 @@ spring:
     activate:
       on-profile: prod
   datasource:
-    url: jdbc:postgresql://postgres:5432/auth_db
-    username: ${DB_AUTH_USER}
-    password: ${DB_AUTH_PASSWORD}
+    url: jdbc:postgresql://postgres:5432/category_db
+    username: ${DB_CATEGORY_USER}
+    password: ${DB_CATEGORY_PASSWORD}
   jpa:
     show-sql: false
     hibernate:
       ddl-auto: validate
-jwt:
-  private-key: ${JWT_PRIVATE_KEY}
-  public-key: ${JWT_PUBLIC_KEY}
 eureka:
   client:
     service-url:
