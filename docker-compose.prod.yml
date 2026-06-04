@@ -18,7 +18,7 @@ services:
     restart: unless-stopped
 
   config-service:
-    image: ghcr.io/TU_USUARIO_GITHUB/storeapi-config-service:latest
+    image: ghcr.io/kalebgit/storeapi-config-service:latest
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8888/actuator/health || exit 1"]
       interval: 10s
@@ -28,7 +28,7 @@ services:
     restart: unless-stopped
 
   registry-service:
-    image: ghcr.io/TU_USUARIO_GITHUB/storeapi-registry-service:latest
+    image: ghcr.io/kalebgit/storeapi-registry-service:latest
     depends_on:
       config-service:
         condition: service_healthy
@@ -41,7 +41,7 @@ services:
     restart: unless-stopped
 
   auth-service:
-    image: ghcr.io/TU_USUARIO_GITHUB/storeapi-auth-service:latest
+    image: ghcr.io/kalebgit/storeapi-auth-service:latest
     depends_on:
       config-service:
         condition: service_healthy
@@ -67,7 +67,7 @@ services:
     restart: unless-stopped
 
   customer-service:
-    image: ghcr.io/TU_USUARIO_GITHUB/storeapi-customer-service:latest
+    image: ghcr.io/kalebgit/storeapi-customer-service:latest
     depends_on:
       config-service:
         condition: service_healthy
@@ -85,7 +85,7 @@ services:
     restart: unless-stopped
 
   product-service:
-    image: ghcr.io/TU_USUARIO_GITHUB/storeapi-product-service:latest
+    image: ghcr.io/kalebgit/storeapi-product-service:latest
     depends_on:
       config-service:
         condition: service_healthy
@@ -103,7 +103,7 @@ services:
     restart: unless-stopped
 
   category-service:
-    image: ghcr.io/TU_USUARIO_GITHUB/storeapi-category-service:latest
+    image: ghcr.io/kalebgit/storeapi-category-service:latest
     depends_on:
       config-service:
         condition: service_healthy
@@ -121,7 +121,7 @@ services:
     restart: unless-stopped
 
   invoice-service:
-    image: ghcr.io/TU_USUARIO_GITHUB/storeapi-invoice-service:latest
+    image: ghcr.io/kalebgit/storeapi-invoice-service:latest
     depends_on:
       config-service:
         condition: service_healthy
@@ -139,7 +139,7 @@ services:
     restart: unless-stopped
 
   gateway-service:
-    image: ghcr.io/TU_USUARIO_GITHUB/storeapi-gateway-service:latest
+    image: ghcr.io/kalebgit/storeapi-gateway-service:latest
     ports:
       - "8080:8080"
     depends_on:
@@ -156,7 +156,7 @@ services:
     restart: unless-stopped
 
   admin-service:
-    image: ghcr.io/TU_USUARIO_GITHUB/storeapi-admin-service:latest
+    image: ghcr.io/kalebgit/storeapi-admin-service:latest
     ports:
       - "127.0.0.1:9090:9090"   # solo accesible desde el propio VPS, no al exterior
     depends_on:
