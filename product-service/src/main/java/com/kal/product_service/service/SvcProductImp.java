@@ -26,7 +26,7 @@ public class SvcProductImp implements SvcProduct{
     private final RepoProduct repoProduct;
     private final MapperProduct mapperProduct;
 
-    
+
     @Override
     public List<DtoProductOut> getProducts() {
         return mapperProduct.productsToDtoProductsOut( repoProduct.findAll());
@@ -52,8 +52,6 @@ public class SvcProductImp implements SvcProduct{
             if(msg.contains("ux_product_name")) throw new ApiException("El nombre de este producto ya esta registrado", HttpStatus.CONFLICT);
             if(msg.contains("fk_product_category")) throw new ApiException("El id de categoria no existe", HttpStatus.CONFLICT);
             throw new DBAccessException(e);
-
-
         }
         return "El producto ha sido registrado";
     }
@@ -67,7 +65,7 @@ public class SvcProductImp implements SvcProduct{
         product.setDescription(in.getDescription());
         product.setPrice(in.getPrice());
         product.setStock(in.getStock());
-        product.setCategory_id(in.getCategory_id());
+        product.setCategoryId(in.getCategoryId());
         try {
             repoProduct.save(product);
         } catch (DataAccessException e) {
@@ -79,6 +77,15 @@ public class SvcProductImp implements SvcProduct{
             throw new DBAccessException(e);
         }
         return "El producto ha sido actualizado";
+    }
+
+    @Override
+    public String updateStock(Integer id, Integer quantity){
+        Product product = repoProduct.findById(id)
+                .orElseThrow(() -> new ApiException("Producto no encontrado", HttpStatus.NOT_FOUND));
+        product.setStock(product.getStock() - quantity);
+        repoProduct.save(product);
+        return "Stock actualizado";
     }
 
     @Override
