@@ -28,6 +28,7 @@ public class AuthService {
         }
 
         User user = User.builder()
+                .name(req.getName())
                 .email(req.getEmail())
                 .password(passwordEncoder.encode(req.getPassword()))
                 .enabled(true)
@@ -36,8 +37,7 @@ public class AuthService {
         repoUser.save(user);
 
         customerClient.createCustomer(new DtoCustomerFeign(
-                //el customer y el user tienen el mismo id
-                user.getId(),
+                user.getId(),  // customerId = userId (mismo id en ambos servicios)
                 user.getName(),
                 user.getEmail()
         ));

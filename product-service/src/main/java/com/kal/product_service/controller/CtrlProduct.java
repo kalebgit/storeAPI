@@ -45,7 +45,7 @@ public class CtrlProduct {
     }
 
     @Operation(summary = "Actualizamos el stock de un producto")
-    @PatchMapping("/{id}/stock")
+    @PutMapping("/{id}/stock")
     public ResponseEntity<String> updateStock(
             @PathVariable Integer id,
             @RequestBody Integer quantity

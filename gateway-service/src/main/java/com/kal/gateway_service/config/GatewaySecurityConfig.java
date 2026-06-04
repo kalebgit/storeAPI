@@ -1,7 +1,9 @@
 package com.kal.gateway_service.config;
 
+import jakarta.servlet.DispatcherType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -22,19 +24,17 @@ public class GatewaySecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login/", "/auth/register/").permitAll()
-                        .requestMatchers("/actuator/health/").permitAll()
+                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
+                        .requestMatchers("/actuator/**", "/auth/**").permitAll()
                         .anyRequest().authenticated())
-                .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt.decoder(jwtDecoder())))
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
                 .build();
     }
 
     @Bean
     public JwtDecoder jwtDecoder() {
-        // descarga la clave pública una vez al arrancar, la cachea internamente
         return NimbusJwtDecoder
-                .withJwkSetUri("http://auth-service/.well-known/jwks.json")
+                .withJwkSetUri("http://auth-service:8085/.well-known/jwks.json")
                 .build();
     }
 }
