@@ -53,8 +53,8 @@ jobs:
         with:
           context: ./${{ matrix.service }}        # usa el Dockerfile de cada carpeta
           push: true
-          tags: |
 	    #los tags es poruqe tenemos el repo con mayus pero neceistamos todo en minus
+          tags: |
             ghcr.io/${{ github.repository_owner }}/storeapi-${{ matrix.service }}:latest
             ghcr.io/${{ github.repository_owner }}/storeapi-${{ matrix.service }}:${{ github.sha }}
           # El tag con el SHA permite hacer rollback a cualquier commit anterior
