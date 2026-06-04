@@ -1,33 +1,103 @@
-name: Build & Push
+name: Build, Push y Deploy
 
 on:
   push:
     branches: [main]
+  workflow_dispatch:      # permite dispararlo manualmente desde la interfaz de GitHub
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}   # ghcr.io/MI USUARIO/MI REPOSITORIO
 
 jobs:
-  build:
+  # job 1: Construir y subir todas las imágenes en paralelo
+  # matrix.service crea un job independiente por cada servicio
+  # ----------------------------------------------------------------
+  build-and-push:
+    name: Build ${{ matrix.service }}
     runs-on: ubuntu-latest
+
     permissions:
       contents: read
-      packages: write          
+      packages: write     # necesario para escribir en GHCR
+
+    strategy:
+      matrix:
+        service:
+          - config-service
+          - registry-service
+          - auth-service
+          - customer-service
+          - product-service
+          - category-service
+          - invoice-service
+          - gateway-service
+          - admin-service
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout del código
+        uses: actions/checkout@v4
 
-      - name: Login to GHCR
+      - name: Configurar Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        # buildx habilita builds en paralelo y el sistema de cache de capas
+
+      - name: Login a GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}   # es un token automático
+          password: ${{ secrets.GITHUB_TOKEN }}   # token automatico, no necesitas crearlo
 
-      - name: Build and push
-        uses: docker/build-push-action@v5
+      - name: Build y push de ${{ matrix.service }}
+        uses: docker/build-push-action@v6
         with:
-          context: .
+          context: ./${{ matrix.service }}        # usa el Dockerfile de cada carpeta
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          tags: |
+	    #los tags es poruqe tenemos el repo con mayus pero neceistamos todo en minus
+            ghcr.io/${{ github.repository_owner }}/storeapi-${{ matrix.service }}:latest
+            ghcr.io/${{ github.repository_owner }}/storeapi-${{ matrix.service }}:${{ github.sha }}
+          # El tag con el SHA permite hacer rollback a cualquier commit anterior
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+
+  # job  2: Deploy al VPS
+  # Solo corre si TODOS los builds del job anterior pasaron
+  # ----------------------------------------------------------------
+  deploy:
+    name: Deploy al VPS
+    needs: build-and-push   # espera a que todos los builds terminen exitosamente
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout (para copiar archivos al VPS)
+        uses: actions/checkout@v4
+
+      - name: Copiar docker-compose e init-db al VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "docker-compose.prod.yml,init-db.sql"
+          target: /opt/storeapi
+
+      - name: Deploy vía SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /opt/storeapi
+
+            # Descargar las nuevas imágenes
+            docker compose -f docker-compose.prod.yml pull
+
+            # Reiniciar los servicios con las nuevas imágenes
+            docker compose -f docker-compose.prod.yml up -d
+
+            # Limpiar imágenes antiguas para no llenar el disco
+            docker image prune -f
+
+            echo "Deploy completado exitosamente"
