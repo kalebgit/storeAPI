@@ -7,6 +7,10 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     driver-class-name: org.postgresql.Driver
+  cloud:
+    openfeign:
+      okhttp:
+        enabled: true
 
 eureka:
   instance:

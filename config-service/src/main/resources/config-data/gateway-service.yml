@@ -2,15 +2,11 @@ server:
   port: 8080
 
 spring:
-
   cloud:
     gateway:
       server:
         webmvc:
-          # confiar en headers de proxy (Nginx, load balancer)
-          # TODO: implementar o documentar por que puse esto en el proyecto
           trusted-proxies: "10\\.0\\.0\\..*"
-          # configuracion de cors centralizado para no ponerlo en cada sericio
           globalcors:
             cors-configurations:
               '[/**]':
@@ -19,40 +15,58 @@ spring:
                 allowed-headers: "Authorization,Content-Type"
                 allow-credentials: true
                 max-age: 3600
-      routes:
-        # rutas hacia servicios de negocio — usa el nombre de Eureka
-        - id: auth-service
-          uri: lb://auth-service          # lb:// = load balanced
-          predicates:
-            - Path=/auth/**
-          filters:
-            - StripPrefix=1               # quita /auth → /login, /register...
+          routes:
+            - id: auth-service
+              uri: lb://auth-service
+              predicates:
+                - Path=/auth/**
+              filters:
+                - StripPrefix=1
 
-        - id: product-service
-          uri: lb://product-service
-          predicates:
-            - Path=/api/products/**
-          filters:
-            - StripPrefix=1               # quita /api → /products/...
+            - id: customer-service
+              uri: lb://customer-service
+              predicates:
+                - Path=/customer/**
+              filters:
+                - StripPrefix=0
 
-        - id: category-service
-          uri: lb://category-service
-          predicates:
-            - Path=/api/categories/**
-          filters:
-            - StripPrefix=1
+            - id: product-service
+              uri: lb://product-service
+              predicates:
+                - Path=/product/**
+              filters:
+                - StripPrefix=0
 
-      # descubrimiento automático con Eureka por si se me fue alguna
+            - id: category-service
+              uri: lb://category-service
+              predicates:
+                - Path=/category/**
+              filters:
+                - StripPrefix=0
+
+            - id: invoice-service
+              uri: lb://invoice-service
+              predicates:
+                - Path=/invoice/**
+              filters:
+                - StripPrefix=0
+
+            - id: cart-service
+              uri: lb://invoice-service
+              predicates:
+                - Path=/cart-item/**
+              filters:
+                - StripPrefix=0
+
       discovery:
         locator:
           enabled: true
-          lower-case-service-id: true     # product-service en lugar de PRODUCT-SERVICE
-          #porque normalmente en eureka estan los nombres en mayus
+          lower-case-service-id: true
 
-eureka:     # necesario para que lb:// funcione
+eureka:
   client:
-    register-with-eureka: true #el gateway tambien se registra en eureka
-    fetch-registry: true #descarga el registro para conocer los otros serv
+    register-with-eureka: true
+    fetch-registry: true
     service-url:
       defaultZone: http://localhost:8761/eureka
   instance:
@@ -64,7 +78,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,env
   endpoint:
     health:
       show-details: always
