@@ -1,3 +1,10 @@
 spring:
   application:
     name: product-service
+  profiles:
+    active: dev     # cambiar a prod en docker-compose.prod.yml via variable de entorno
+  config:
+    import: "optional:configserver:"
+  cloud:
+    config:
+      uri: http://localhost:8888

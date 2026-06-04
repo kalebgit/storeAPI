@@ -1,0 +1,182 @@
+services:
+
+  # infraestructura
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  config-service:
+    build: ./config-service
+    ports:
+      - "8888:8888"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8888/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+  registry-service:
+    build: ./registry-service
+    ports:
+      - "8761:8761"
+    depends_on:
+      config-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8761/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+  # servicios de negocio
+
+  auth-service:
+    build: ./auth-service
+    ports:
+      - "8085:8085"
+    depends_on:
+      config-service:
+        condition: service_healthy
+      registry-service:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_CLOUD_CONFIG_URI: http://config-service:8888
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/auth_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: root
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://registry-service:8761/eureka/
+      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      SPRING_PROFILES_ACTIVE: dev
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8085/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+  customer-service:
+    build: ./customer-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      config-service:
+        condition: service_healthy
+      registry-service:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_CLOUD_CONFIG_URI: http://config-service:8888
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/customer_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: root
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://registry-service:8761/eureka/
+      SPRING_PROFILES_ACTIVE: dev
+
+  product-service:
+    build: ./product-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      config-service:
+        condition: service_healthy
+      registry-service:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_CLOUD_CONFIG_URI: http://config-service:8888
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/product_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: root
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://registry-service:8761/eureka/
+      SPRING_PROFILES_ACTIVE: dev
+
+  category-service:
+    build: ./category-service
+    ports:
+      - "8084:8084"
+    depends_on:
+      config-service:
+        condition: service_healthy
+      registry-service:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_CLOUD_CONFIG_URI: http://config-service:8888
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/category_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: root
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://registry-service:8761/eureka/
+      SPRING_PROFILES_ACTIVE: dev
+
+  invoice-service:
+    build: ./invoice-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      config-service:
+        condition: service_healthy
+      registry-service:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_CLOUD_CONFIG_URI: http://config-service:8888
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/invoice_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: root
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://registry-service:8761/eureka/
+      SPRING_PROFILES_ACTIVE: dev
+
+  gateway-service:
+    build: ./gateway-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      config-service:
+        condition: service_healthy
+      registry-service:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    environment:
+      SPRING_CLOUD_CONFIG_URI: http://config-service:8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://registry-service:8761/eureka/
+      SPRING_PROFILES_ACTIVE: dev
+
+  admin-service:
+    build: ./admin-service
+    ports:
+      - "9090:9090"
+    depends_on:
+      config-service:
+        condition: service_healthy
+      registry-service:
+        condition: service_healthy
+    environment:
+      SPRING_CLOUD_CONFIG_URI: http://config-service:8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://registry-service:8761/eureka/
+      SPRING_PROFILES_ACTIVE: dev
+
+volumes:
+  postgres_data:

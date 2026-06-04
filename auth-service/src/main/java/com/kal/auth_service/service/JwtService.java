@@ -27,11 +27,14 @@ public class JwtService {
     public String generateToken(UserDetails userDetails) {
         RSAPrivateKey privateKey = loadPrivateKey(privateKeyPem);
 
+        User user = (User) userDetails;
+
         return Jwts.builder()
-                .subject(userDetails.getUsername())
+                .subject(String.valueOf(user.getId()))  // subject = userId numérico
+                .claim("email", user.getEmail())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationMs))
-                .signWith(privateKey)  // RS256 automático con RSAPrivateKey
+                .signWith(privateKey)
                 .compact();
     }
 
