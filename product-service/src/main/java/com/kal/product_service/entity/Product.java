@@ -21,9 +21,9 @@ public class Product{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_id")
-    private Integer product_id;
+    private Integer productId;
 
-    //global trade item number
+    // global trade item number
     @Column(name = "gtin")
     private String gtin;
 
@@ -40,7 +40,7 @@ public class Product{
     private Integer stock;
 
     @Column(name = "category")
-    private Integer category_id;
+    private Integer categoryId;
 
     @Column(name = "status")
     private Integer status;

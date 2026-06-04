@@ -36,6 +36,7 @@ public class AuthService {
         repoUser.save(user);
 
         customerClient.createCustomer(new DtoCustomerFeign(
+                //el customer y el user tienen el mismo id
                 user.getId(),
                 user.getName(),
                 user.getEmail()

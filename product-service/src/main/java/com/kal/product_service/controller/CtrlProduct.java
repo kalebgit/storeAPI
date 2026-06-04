@@ -31,6 +31,7 @@ public class CtrlProduct {
         return ResponseEntity.ok(svcProduct.getProduct(id));
     }
 
+
     @Operation(summary = "Registrar un producto")
     @PostMapping
     public ResponseEntity<String> createProduct(@Valid @RequestBody DtoProductIn in) {
@@ -41,6 +42,18 @@ public class CtrlProduct {
     @PutMapping("/{id}")
     public ResponseEntity<String> updateProduct(@PathVariable Integer id, @Valid @RequestBody DtoProductIn in) {
         return ResponseEntity.ok(svcProduct.updateProduct(id, in));
+    }
+
+    @Operation(summary = "Actualizamos el stock de un producto")
+    @PatchMapping("/{id}/stock")
+    public ResponseEntity<String> updateStock(
+            @PathVariable Integer id,
+            @RequestBody Integer quantity
+            //cuando el tipo es un primitivo o wrapper simple como Integer,
+            // String, Float, Spring espera el valor directamente en el body,
+            // no un JSON con llaves
+    ) {
+        return ResponseEntity.ok(svcProduct.updateStock(id, quantity));
     }
 
     @Operation(summary = "Activar un producto")
