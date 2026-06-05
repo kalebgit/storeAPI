@@ -27,7 +27,8 @@ public class AuthSecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
-                        .requestMatchers("/login", "/register", "/actuator/**", "/.well-known/jwks.json").permitAll()
+                        .requestMatchers("/login", "/register", "/actuator/**", "/.well-known/jwks.json",
+                                "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated()
                 )
                 .build();

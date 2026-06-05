@@ -5,6 +5,7 @@ services:
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
@@ -14,18 +15,20 @@ services:
       timeout: 5s
       retries: 5
       start_period: 15s
+    restart: unless-stopped
 
   config-service:
-    build: ./config-service
+    image: ghcr.io/kalebgit/storeapi-config-service:latest
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8888/actuator/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 40s
+    restart: unless-stopped
 
   registry-service:
-    build: ./registry-service
+    image: ghcr.io/kalebgit/storeapi-registry-service:latest
     depends_on:
       config-service:
         condition: service_healthy
@@ -35,9 +38,10 @@ services:
       timeout: 5s
       retries: 10
       start_period: 40s
+    restart: unless-stopped
 
   auth-service:
-    build: ./auth-service
+    image: ghcr.io/kalebgit/storeapi-auth-service:latest
     depends_on:
       config-service:
         condition: service_healthy
@@ -47,20 +51,23 @@ services:
         condition: service_healthy
     environment:
       SPRING_CLOUD_CONFIG_URI: http://config-service:8888
-      DB_AUTH_USER: ${DB_USER}
-      DB_AUTH_PASSWORD: ${DB_PASSWORD}
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/auth_db
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://registry-service:8761/eureka/
       JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
       JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
-      SPRING_PROFILES_ACTIVE: prod
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8085/actuator/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 60s
+    restart: unless-stopped
 
   customer-service:
-    build: ./customer-service
+    image: ghcr.io/kalebgit/storeapi-customer-service:latest
     depends_on:
       config-service:
         condition: service_healthy
@@ -70,12 +77,15 @@ services:
         condition: service_healthy
     environment:
       SPRING_CLOUD_CONFIG_URI: http://config-service:8888
-      DB_CUSTOMER_USER: ${DB_USER}
-      DB_CUSTOMER_PASSWORD: ${DB_PASSWORD}
       SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/customer_db
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://registry-service:8761/eureka/
+    restart: unless-stopped
 
   product-service:
-    build: ./product-service
+    image: ghcr.io/kalebgit/storeapi-product-service:latest
     depends_on:
       config-service:
         condition: service_healthy
@@ -85,12 +95,15 @@ services:
         condition: service_healthy
     environment:
       SPRING_CLOUD_CONFIG_URI: http://config-service:8888
-      DB_PRODUCT_USER: ${DB_USER}
-      DB_PRODUCT_PASSWORD: ${DB_PASSWORD}
       SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/product_db
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://registry-service:8761/eureka/
+    restart: unless-stopped
 
   category-service:
-    build: ./category-service
+    image: ghcr.io/kalebgit/storeapi-category-service:latest
     depends_on:
       config-service:
         condition: service_healthy
@@ -100,12 +113,15 @@ services:
         condition: service_healthy
     environment:
       SPRING_CLOUD_CONFIG_URI: http://config-service:8888
-      DB_CATEGORY_USER: ${DB_USER}
-      DB_CATEGORY_PASSWORD: ${DB_PASSWORD}
       SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/category_db
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://registry-service:8761/eureka/
+    restart: unless-stopped
 
   invoice-service:
-    build: ./invoice-service
+    image: ghcr.io/kalebgit/storeapi-invoice-service:latest
     depends_on:
       config-service:
         condition: service_healthy
@@ -115,12 +131,15 @@ services:
         condition: service_healthy
     environment:
       SPRING_CLOUD_CONFIG_URI: http://config-service:8888
-      DB_INVOICE_USER: ${DB_USER}
-      DB_INVOICE_PASSWORD: ${DB_PASSWORD}
       SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/invoice_db
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://registry-service:8761/eureka/
+    restart: unless-stopped
 
   gateway-service:
-    build: ./gateway-service
+    image: ghcr.io/kalebgit/storeapi-gateway-service:latest
     ports:
       - "8080:8080"
     depends_on:
@@ -133,9 +152,13 @@ services:
     environment:
       SPRING_CLOUD_CONFIG_URI: http://config-service:8888
       SPRING_PROFILES_ACTIVE: prod
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://registry-service:8761/eureka/
+    restart: unless-stopped
 
   admin-service:
-    build: ./admin-service
+    image: ghcr.io/kalebgit/storeapi-admin-service:latest
+    ports:
+      - "127.0.0.1:9090:9090"   # solo accesible desde el propio VPS, no al exterior
     depends_on:
       config-service:
         condition: service_healthy
@@ -144,6 +167,8 @@ services:
     environment:
       SPRING_CLOUD_CONFIG_URI: http://config-service:8888
       SPRING_PROFILES_ACTIVE: prod
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://registry-service:8761/eureka/
+    restart: unless-stopped
 
 volumes:
   postgres_data:
