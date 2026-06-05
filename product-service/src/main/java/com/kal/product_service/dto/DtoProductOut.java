@@ -1,27 +1,30 @@
 package com.kal.product_service.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.springframework.stereotype.Component;
 
 @Data
+@Schema(description = "Datos de un producto")
 public class DtoProductOut {
 
+    @Schema(description = "ID único del producto", example = "1")
     private Integer productId;
 
+    @Schema(description = "Código GTIN", example = "7501055300057")
     private String gtin;
 
+    @Schema(description = "Nombre del producto", example = "Coca-cola 600 ml")
     private String name;
 
+    @Schema(description = "Descripción", example = "Refresco de cola 600 ml")
     private String description;
 
+    @Schema(description = "Precio unitario", example = "21.00")
     private Float price;
 
+    @Schema(description = "Unidades en inventario", example = "98")
     private Integer stock;
 
+    @Schema(description = "ID de la categoría", example = "1")
     private Integer categoryId;
-
 }
