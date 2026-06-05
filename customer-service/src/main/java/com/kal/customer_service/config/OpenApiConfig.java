@@ -1,4 +1,4 @@
-package com.kal.product_service.config;
+package com.kal.customer_service.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -15,9 +15,9 @@ public class OpenApiConfig {
     public OpenAPI customOpenApi() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("StoreAPI - servicio de productos")
+                        .title("StoreAPI - servicio de clientes")
                         .version("1.0.0")
-                        .description("Gestión del catálogo de productos de la tienda Ciencias"))
+                        .description("Gestión de clientes de la tienda Ciencias"))
                 .addSecurityItem(new SecurityRequirement().addList("bearer-jwt"))
                 .components(new Components()
                         .addSecuritySchemes("bearer-jwt", new SecurityScheme()

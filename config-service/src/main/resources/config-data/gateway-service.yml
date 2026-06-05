@@ -16,6 +16,41 @@ spring:
                 allow-credentials: true
                 max-age: 3600
           routes:
+            - id: api-docs-auth
+              uri: lb://auth-service
+              predicates:
+                - Path=/v3/api-docs/auth-service
+              filters:
+                - RewritePath=/v3/api-docs/auth-service, /v3/api-docs
+
+            - id: api-docs-customer
+              uri: lb://customer-service
+              predicates:
+                - Path=/v3/api-docs/customer-service
+              filters:
+                - RewritePath=/v3/api-docs/customer-service, /v3/api-docs
+
+            - id: api-docs-product
+              uri: lb://product-service
+              predicates:
+                - Path=/v3/api-docs/product-service
+              filters:
+                - RewritePath=/v3/api-docs/product-service, /v3/api-docs
+
+            - id: api-docs-category
+              uri: lb://category-service
+              predicates:
+                - Path=/v3/api-docs/category-service
+              filters:
+                - RewritePath=/v3/api-docs/category-service, /v3/api-docs
+
+            - id: api-docs-invoice
+              uri: lb://invoice-service
+              predicates:
+                - Path=/v3/api-docs/invoice-service
+              filters:
+                - RewritePath=/v3/api-docs/invoice-service, /v3/api-docs
+
             - id: auth-service
               uri: lb://auth-service
               predicates:
@@ -82,6 +117,22 @@ management:
   endpoint:
     health:
       show-details: always
+
+springdoc:
+  swagger-ui:
+    urls:
+      - name: auth-service
+        url: /v3/api-docs/auth-service
+      - name: customer-service
+        url: /v3/api-docs/customer-service
+      - name: product-service
+        url: /v3/api-docs/product-service
+      - name: category-service
+        url: /v3/api-docs/category-service
+      - name: invoice-service
+        url: /v3/api-docs/invoice-service
+    path: /swagger-ui.html
+    disable-swagger-default-url: true
 
 ---
 spring:

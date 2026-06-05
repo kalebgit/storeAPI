@@ -1,4 +1,4 @@
-package com.kal.product_service.config;
+package com.kal.invoice_service.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -15,9 +15,9 @@ public class OpenApiConfig {
     public OpenAPI customOpenApi() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("StoreAPI - servicio de productos")
+                        .title("StoreAPI - servicio de facturación")
                         .version("1.0.0")
-                        .description("Gestión del catálogo de productos de la tienda Ciencias"))
+                        .description("Carrito de compras y generación de facturas de la tienda Ciencias"))
                 .addSecurityItem(new SecurityRequirement().addList("bearer-jwt"))
                 .components(new Components()
                         .addSecuritySchemes("bearer-jwt", new SecurityScheme()
