@@ -44,10 +44,22 @@ public class SvcCartItemImp implements SvcCartItem{
 
 
         //esto lo hacemos con el objetivo de verificar que existan tanto el customer como el product
-        customerClient.getCustomer(cartItemIn.getCustomerId());
-        productClient.getProduct(cartItemIn.getProductId());
+        DtoCustomerFeign customerFeign = customerClient.getCustomer(cartItemIn.getCustomerId());
+        DtoProductOut product =  productClient.getProduct(cartItemIn.getProductId());
         try{
-            repoCartItem.save(mapperCartItem.dtoCartItemInToCartItem(cartItemIn));
+            if(product.getStock() < cartItemIn.getQuantity()){
+                throw new ApiException("Stock insuficiente", HttpStatus.CONFLICT);
+            }
+            repoCartItem.getCartItemByCustomerIdAndProductId(customerFeign.getId(),
+                    product.getProductId()).ifPresentOrElse(
+                    (cartItem)->{
+                        cartItem.setQuantity(cartItem.getQuantity() + cartItemIn.getQuantity());
+                        repoCartItem.save(cartItem);
+                    },
+                    ()->{
+                        repoCartItem.save(mapperCartItem.dtoCartItemInToCartItem(cartItemIn));
+                    }
+            );
         }catch (DataAccessException e){
             throw new DBAccessException(e);
         }
@@ -81,7 +93,21 @@ public class SvcCartItemImp implements SvcCartItem{
     public List<DtoCartItemOut> getCart(Integer customerId) {
         try{
 
-            return mapperCartItem.cartItemsToDtoCartItemsOut(repoCartItem.getCartItemsByCustomerId(customerId));
+            return
+                    repoCartItem.getCartItemsByCustomerId(customerId)
+                            .stream()
+                            .map(item->{
+                                DtoProductOut product =
+                                        productClient.getProduct(item.getProductId());
+                                return DtoCartItemOut.builder()
+                                        .productId(product.getProductId())
+                                        .customerId(customerId)
+                                        .name(product.getName())
+                                        .price(product.getPrice())
+                                        .quantity(item.getQuantity())
+                                        .build();
+
+                            }).toList();
 
         }catch(DataAccessException e){
             Throwable cause = e.getMostSpecificCause();

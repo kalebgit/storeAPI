@@ -17,6 +17,11 @@ public class DtoCartItemOut {
 
     private Integer productId;
 
+    private String name;
+
+    private Float price;
+
     private Integer quantity;
+
 
 }
