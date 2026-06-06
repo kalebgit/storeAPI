@@ -41,6 +41,10 @@ public class SvcInvoiceImp implements SvcInvoice{
         //leer todos los cart items
         List<CartItem> items = repoCartItem.getCartItemsByCustomerId(customerId);
 
+        if (items.isEmpty()) {
+            throw new ApiException("El carrito está vacío", HttpStatus.BAD_REQUEST);
+        }
+
         List<InvoiceItem> itemsToSave = new ArrayList<>();
         float total = 0f;
         //validar stockkk (feign)

@@ -1,22 +1,30 @@
 package com.kal.product_service.entity;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "product")
+@Table(
+    name = "product",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "ux_product_gtin", columnNames = "gtin"),
+        @UniqueConstraint(name = "ux_product_name", columnNames = "name")
+    }
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Product{
+public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
