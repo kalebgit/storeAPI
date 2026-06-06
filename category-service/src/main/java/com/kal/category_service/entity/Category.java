@@ -4,7 +4,13 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table(name="category")
+@Table(
+    name = "category",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "ux_category_category", columnNames = "category"),
+        @UniqueConstraint(name = "ux_category_tag", columnNames = "tag")
+    }
+)
 @Data
 public class Category {
 
