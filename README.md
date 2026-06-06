@@ -164,6 +164,84 @@ Los endpoints marcados con <big>*</big> requieren token JWT.
 
 ---
 
+## Puntos extra
+
+Se implementaron 3 funcionalidades adicionales sobre el flujo de facturación, todas opcionales y pasadas en el body del `POST /invoice`.
+
+### 1. Dirección de envío
+
+Al generar una factura se puede incluir una dirección de envío. Se guarda en la tabla `shipping_address` con una relación `@OneToOne` a la factura (`CascadeType.ALL`). Si no se envía, la factura se genera sin dirección.
+
+```json
+{
+  "street": "Av. Universidad 3000",
+  "city": "Ciudad de México",
+  "state": "CDMX",
+  "zipCode": "04510"
+}
+```
+
+Respuesta incluye:
+```json
+"shippingAddress": {
+  "street": "Av. Universidad 3000",
+  "city": "Ciudad de México",
+  "state": "CDMX",
+  "zipCode": "04510"
+}
+```
+
+### 2. Información de pago
+
+Permite registrar el método de pago y los últimos 4 dígitos de la tarjeta. Se guarda en la tabla `payment_info` también con `@OneToOne` a la factura.
+
+```json
+{
+  "paymentMethod": "CARD",
+  "cardLastFour": "1234"
+}
+```
+
+Respuesta incluye:
+```json
+"paymentInfo": {
+  "paymentMethod": "CARD",
+  "cardLastFour": "1234"
+}
+```
+
+### 3. Cupones de descuento
+
+Sistema de cupones con código único y porcentaje de descuento. Primero se crea el cupón y luego se usa al facturar.
+
+**Crear cupón** — `POST /invoice/coupon` (solo admins / personal interno):
+```json
+{
+  "code": "DESCUENTO10",
+  "discount": 0.10
+}
+```
+
+**Usar cupón al facturar** — `POST /invoice`:
+```json
+{
+  "couponCode": "DESCUENTO10"
+}
+```
+
+El descuento se aplica sobre el subtotal antes de calcular impuestos. La respuesta incluye el monto descontado:
+```json
+{
+  "subtotal": 53.55,
+  "taxes":    9.45,
+  "total":    63.00,
+  "discount": 7.00
+}
+```
+
+
+---
+
 ## Microservicios
 
 | Servicio | Puerto | Descripción |
