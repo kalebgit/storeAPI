@@ -100,6 +100,7 @@ public class SvcCartItemImp implements SvcCartItem{
                                 DtoProductOut product =
                                         productClient.getProduct(item.getProductId());
                                 return DtoCartItemOut.builder()
+                                        .id(item.getId())
                                         .productId(product.getProductId())
                                         .customerId(customerId)
                                         .name(product.getName())
