@@ -50,7 +50,7 @@ public class SvcCartItemImp implements SvcCartItem{
             if(product.getStock() < cartItemIn.getQuantity()){
                 throw new ApiException("Stock insuficiente", HttpStatus.CONFLICT);
             }
-            repoCartItem.getCartItemByCustomerIdAndProductId(customerFeign.getId(),
+            repoCartItem.getCartItemByCustomerIdAndProductId(customerFeign.getCustomerId(),
                     product.getProductId()).ifPresentOrElse(
                     (cartItem)->{
                         cartItem.setQuantity(cartItem.getQuantity() + cartItemIn.getQuantity());
