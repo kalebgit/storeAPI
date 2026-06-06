@@ -1,8 +1,10 @@
 package com.kal.invoice_service.controller;
 
+import com.kal.invoice_service.dto.DtoCouponIn;
 import com.kal.invoice_service.dto.DtoInvoiceIn;
 import com.kal.invoice_service.dto.DtoInvoiceOut;
 import com.kal.invoice_service.entity.Coupon;
+import com.kal.invoice_service.exception.ApiException;
 import com.kal.invoice_service.repository.RepoCoupon;
 import com.kal.invoice_service.service.SvcInvoice;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -50,9 +53,21 @@ public class CtrlInvoice {
             @ApiResponse(responseCode = "401", description = "Token inválido o ausente")
     })
     @PostMapping("/coupon")
-    public ResponseEntity<String> createCoupon(@RequestBody Coupon coupon) {
-        coupon.setActive(true);
-        repoCoupon.save(coupon);
+    public ResponseEntity<String> createCoupon(@RequestBody DtoCouponIn in) {
+        try {
+            Coupon coupon = Coupon.builder()
+                    .code(in.getCode())
+                    .discount(in.getDiscount())
+                    .active(true)
+                    .build();
+            repoCoupon.save(coupon);
+        } catch (DataAccessException e) {
+            String msg = e.getMostSpecificCause().getMessage();
+            if (msg != null && msg.contains("ux_coupon_code")) {
+                throw new ApiException("El código de cupón ya existe", HttpStatus.CONFLICT);
+            }
+            throw e;
+        }
         return ResponseEntity.status(HttpStatus.CREATED).body("Cupón creado exitosamente");
     }
 }
