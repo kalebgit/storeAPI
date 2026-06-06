@@ -147,6 +147,20 @@ Los endpoints marcados con <big>*</big> requieren token JWT.
 | Método | Ruta | Descripción | Auth |
 |---|---|---|---|
 | `POST` | `/invoice` | Finalizar compra y generar factura | <big>*</big> |
+| `POST` | `/invoice/coupon` | Crear cupón de descuento | <big>*</big> |
+
+> **Tip:** El body del `POST /invoice` es completamente opcional. Puedes incluir dirección de envío, método de pago y/o cupón:
+> ```json
+> {
+>   "street": "Av. Universidad 3000",
+>   "city": "Ciudad de México",
+>   "state": "CDMX",
+>   "zipCode": "04510",
+>   "paymentMethod": "CARD",
+>   "cardLastFour": "1234",
+>   "couponCode": "DESCUENTO10"
+> }
+> ```
 
 ---
 

@@ -32,13 +32,21 @@ public class Invoice {
     private Float taxes;
 
     @Column(nullable = false)
+    private Float discount;
+
+    @Column(nullable = false)
     private Float total;
 
-    @CreationTimestamp//setea el tiempo en que fue creado automaticamente
+    @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "invoice")
     private List<InvoiceItem> items;
-}
 
+    @OneToOne(mappedBy = "invoice", cascade = CascadeType.ALL)
+    private ShippingAddress shippingAddress;
+
+    @OneToOne(mappedBy = "invoice", cascade = CascadeType.ALL)
+    private PaymentInfo paymentInfo;
+}

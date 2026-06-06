@@ -22,11 +22,20 @@ public class DtoInvoiceOut {
     @Schema(description = "Impuestos (16%)", example = "6.72")
     private Float taxes;
 
-    @Schema(description = "Total con impuestos incluidos", example = "42.00")
+    @Schema(description = "Descuento aplicado", example = "4.20")
+    private Float discount;
+
+    @Schema(description = "Total con impuestos e descuento aplicados", example = "37.80")
     private Float total;
 
     @Schema(description = "Fecha y hora de creación", example = "2026-06-05T18:00:00")
     private LocalDateTime createdAt;
+
+    @Schema(description = "Dirección de envío")
+    private DtoShippingAddressOut shippingAddress;
+
+    @Schema(description = "Información de pago")
+    private DtoPaymentInfoOut paymentInfo;
 
     @Schema(description = "Productos incluidos en la factura")
     private List<DtoInvoiceItemOut> items;
