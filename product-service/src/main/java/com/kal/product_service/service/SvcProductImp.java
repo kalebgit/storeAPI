@@ -48,7 +48,7 @@ public class SvcProductImp implements SvcProduct{
             Throwable cause = e.getMostSpecificCause();
             String msg = Optional.ofNullable(cause.getMessage()).orElse("");
 
-            if(msg.contains("ux_product_gtin")) throw new ApiException("El gtin de este producto ya esta registrado", HttpStatus.NOT_FOUND);
+            if(msg.contains("ux_product_gtin")) throw new ApiException("El gtin de este producto ya esta registrado", HttpStatus.CONFLICT);
             if(msg.contains("ux_product_name")) throw new ApiException("El nombre de este producto ya esta registrado", HttpStatus.CONFLICT);
             if(msg.contains("fk_product_category")) throw new ApiException("El id de categoria no existe", HttpStatus.CONFLICT);
             throw new DBAccessException(e);
